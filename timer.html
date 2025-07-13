@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preparing Download...</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+        #background-iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 1; }
+        #timer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 2; display: flex; justify-content: center; align-items: center; flex-direction: column; color: white; font-family: sans-serif; text-shadow: 2px 2px 4px #000000; }
+        #timer-overlay h1 { font-size: 28px; }
+        #timer-overlay #timer { font-size: 72px; font-weight: bold; }
+        #timer-overlay.hidden { display: none; }
+    </style>
+</head>
+<body>
+    <iframe id="background-iframe" src=""></iframe>
+    <div id="timer-overlay">
+        <h1>Your Download will start in...</h1>
+        <div id="timer">10</div>
+    </div>
+    <script>
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const imageUrl = decodeURIComponent(urlParams.get('image'));
+            const redirectUrl = decodeURIComponent(urlParams.get('redirect'));
+            if (!imageUrl || !redirectUrl) {
+                document.getElementById('timer-overlay').innerHTML = '<h1>Error: Invalid Link.</h1>';
+                return;
+            }
+            document.getElementById('background-iframe').src = redirectUrl;
+            let timeLeft = 10;
+            const timerElement = document.getElementById('timer');
+            const overlay = document.getElementById('timer-overlay');
+            const countdown = setInterval(function() {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    triggerDownload(imageUrl);
+                    overlay.classList.add('hidden');
+                }
+            }, 1000);
+            function triggerDownload(url) {
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = url.substring(url.lastIndexOf('/') + 1) || 'wallpaper.jpg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        };
+    </script>
+</body>
+</html>
